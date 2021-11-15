@@ -1,4 +1,5 @@
 from tkinter import filedialog as fd
+import pandas as pd
 import pprint
 
 
@@ -12,7 +13,7 @@ def openfile():
 
 def parse_data(line_of_data, temp_array):
     """Parses all known ABPM50 data elements from string and places into a dictionary
-    Single line dictionary is passed back, should added to the global dictionary, data_array"""
+    Single dictionary entry ,entry for single reading number, is passed back"""
     temp_array[line_of_data[0:3]] = {
         "Year": int(line_of_data[4:8], 16),
         "Month": int(line_of_data[8:10], 16),
@@ -27,24 +28,15 @@ def parse_data(line_of_data, temp_array):
     return temp_array
 
 
-# def format_for_spreadsheet(base_array):
-#     """Prepares a data source which can be easily exported to a spreadsheet"""
-#     for readings in base_array:
-#
-#
-# def export_to_excel(data_to_go):
-#     """Exports data to an excel document"""
-#
-#
-# def export_to_csv(data_to_go):
-#     """Exports data to a CSV file"""
-#
-#
-# def extract_meta_data(current_file):
-#     """Extracts all single fields from file"""
+def export_to_csv(data_to_go, meta_dat):
+    """Exports data to an CSV file, uses meta data to generate filename"""
+    df = pd.DataFrame(data_to_go).T
+    df.to_csv(meta_dat["Name"] + meta_dat["ID"] + ".csv")
+
 
 def read_file(file):
-    """Takes a .awp file and returns a complete dictionary containing all data"""
+    """Takes a .awp file which has been parsed into lines of strings. Returns a complete dictionary containing all
+    readings and a second dictionary containing meta data. """
     data_array = {}
     meta_data = {}
     for lines in file:
@@ -68,8 +60,10 @@ def read_file(file):
             data_array = parse_data(lines, data_array)
         else:
             continue
-
+    print(meta_data["Name"])
+    print(meta_data["ID"])
     return data_array, meta_data
 
 
-pprint.pprint(read_file(openfile()))
+data, meta = read_file(openfile())
+export_to_csv(data, meta)
