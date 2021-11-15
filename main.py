@@ -1,11 +1,10 @@
 from tkinter import filedialog as fd
 import pandas as pd
-import pprint
 
 
 def openfile():
     """Uses a GUI to select a file then returns the content of this file as a list of strings"""
-    filename = fd.askopenfilename()
+    filename = fd.askopenfilename(title="Select a file", filetypes=[("AMBP50 Files", "*.awp")])
     with open(filename) as f:
         send_to_main = f.readlines()
     return send_to_main
@@ -31,7 +30,7 @@ def parse_data(line_of_data, temp_array):
 def export_to_csv(data_to_go, meta_dat):
     """Exports data to an CSV file, uses meta data to generate filename"""
     df = pd.DataFrame(data_to_go).T
-    df.to_csv(meta_dat["Name"] + meta_dat["ID"] + ".csv")
+    df.to_csv(fd.askdirectory(title="Select Save Directory") + "/" + meta_dat["Name"] + meta_dat["ID"] + ".csv")
 
 
 def read_file(file):
