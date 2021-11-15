@@ -46,10 +46,15 @@ def parse_data(line_of_data, temp_array):
 def read_file(file):
     """Takes a .awp file and returns a complete dictionary containing all data"""
     data_array = {}
+    meta_data = {}
     for lines in file:
         if lines[0] == "C":  # ignore the C numbers, whatever the hell they are
             continue
-        if lines[0:2] == "ID":  # ignore the ID field, (short fields break the rest of the code)
+        if lines[0:2] == "ID":  # add ID field to meta_data
+            meta_data["ID"] = lines[3:-1]
+            continue
+        if lines[0:4] == "Name":  # add Name field to meta_data
+            meta_data["Name"] = lines[5:-1]
             continue
         if lines[0:3] == "Age":  # ignore Age field
             continue
@@ -64,7 +69,7 @@ def read_file(file):
         else:
             continue
 
-    return data_array
+    return data_array, meta_data
 
 
 pprint.pprint(read_file(openfile()))
