@@ -59,9 +59,16 @@ def read_file(file):
             data_array = parse_data(lines, data_array)
         else:
             continue
-    print(meta_data["Name"])
-    print(meta_data["ID"])
     return data_array, meta_data
+
+
+def identify_version(file):
+    """Function to identify whether .awp file is version 1 or 2"""
+    version = 1
+    for line in file:
+        if "FileVersion_Main=2" in line:
+            version = 2
+    return version
 
 
 data, meta = read_file(openfile())
