@@ -27,14 +27,15 @@ def parse_data(line_of_data, temp_array):
     return temp_array
 
 
-def export_to_csv(data_to_go, meta_dat):
-    """Exports data to an CSV file, uses meta data to generate filename"""
-    df = pd.DataFrame(data_to_go).T
+def export_to_csv(df, meta_dat):
+    """Exports data to a CSV file, uses meta data to generate filename"""
+    df = df[['DateTime', 'BP1 Sys', 'BP2 Dia', 'MAP', 'HR']].copy()
+    df.rename(columns={'BP1 Sys': 'Systolic', 'BP2 Dia': 'Diastolic'}, inplace=True)
     df.to_csv(fd.askdirectory(title="Select Save Directory") + "/" + meta_dat["Name"] + meta_dat["ID"] + ".csv")
 
 
 def read_file(file):
-    """Takes a .awp file which has been parsed into lines of strings. Returns a complete dictionary containing all
+    """Takes a .awp file which has been parsed into lines of strings. Returns a pandas dataframe containing all
     readings and a second dictionary containing meta data. """
     data_array = {}
     meta_data = {}
@@ -59,11 +60,13 @@ def read_file(file):
             data_array = parse_data(lines, data_array)
         else:
             continue
-    return data_array, meta_data
+    df = pd.DataFrame(data_array).T  # Creates dataframe from dictionary
+    df["DateTime"] = pd.to_datetime(df[["Year", "Month", "Day", "Hour", "Minute"]]).dt.strftime('%d/%m/%y %H:%M')
+    return df, meta_data
 
 
 def identify_version(file):
-    """Function to identify whether .awp file is version 1 or 2"""
+    """Function to identify whether .awp file is version 1 or 2. Function not currently in use"""
     version = 1
     for line in file:
         if "FileVersion_Main=2" in line:
