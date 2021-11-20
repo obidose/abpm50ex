@@ -1,5 +1,8 @@
 from tkinter import filedialog as fd
 import pandas as pd
+import matplotlib.pyplot as plt
+
+plt.close("all")
 
 
 def openfile():
@@ -11,8 +14,7 @@ def openfile():
 
 
 def parse_data(line_of_data, temp_array):
-    """Parses all known ABPM50 data elements from string and places into a dictionary
-    Single dictionary entry ,entry for single reading number, is passed back"""
+    """Parses all known ABPM50 data elements from string and adds into a single entry dictionary and passes this back"""
     temp_array[line_of_data[0:3]] = {
         "Year": int(line_of_data[4:8], 16),
         "Month": int(line_of_data[8:10], 16),
@@ -28,7 +30,8 @@ def parse_data(line_of_data, temp_array):
 
 
 def export_to_csv(df, meta_dat):
-    """Exports data to a CSV file, uses meta data to generate filename"""
+    """Arranges field order for export. Opens Dialog to select save folder. Exports data to a CSV file using metadata to
+    generate filename. """
     df = df[['DateTime', 'BP1 Sys', 'BP2 Dia', 'MAP', 'HR']].copy()
     df.rename(columns={'BP1 Sys': 'Systolic', 'BP2 Dia': 'Diastolic'}, inplace=True)
     df.to_csv(fd.askdirectory(title="Select Save Directory") + "/" + meta_dat["Name"] + meta_dat["ID"] + ".csv")
@@ -36,11 +39,11 @@ def export_to_csv(df, meta_dat):
 
 def read_file(file):
     """Takes a .awp file which has been parsed into lines of strings. Returns a pandas dataframe containing all
-    readings and a second dictionary containing meta data. """
+    readings and a dictionary containing meta data. """
     data_array = {}
     meta_data = {}
     for lines in file:
-        if lines[0] == "C":  # ignore the C numbers, whatever the hell they are
+        if lines[0] == "C":  # ignore the C numbers
             continue
         if lines[0:2] == "ID":  # add ID field to meta_data
             meta_data["ID"] = lines[3:-1]
@@ -74,5 +77,22 @@ def identify_version(file):
     return version
 
 
+def graph_observations(dataframe):
+    """Takes a dataset and creates a graph of BP and MAP over time"""
+    x = dataframe.DateTime
+    a1 = pd.Series(dataframe["BP1 Sys"])
+    a2 = pd.Series(dataframe["BP2 Dia"])
+    a3 = pd.Series(dataframe["MAP"])
+    plt.plot(x, a1, marker="^")
+    plt.plot(x, a2, marker="v")
+    plt.axhline(y=130)
+    plt.axhline(y=60)
+    plt.plot(x, a3, linestyle="dotted", color='green')
+    plt.bar(x=x, height=a1 - a2, bottom=a2, width=0.05, alpha=.2)
+    plt.fill_between(x, a1, a2, color='blue', alpha=.1)
+    plt.show()
+
+
 data, meta = read_file(openfile())
+graph_observations(data)
 export_to_csv(data, meta)
