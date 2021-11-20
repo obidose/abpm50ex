@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 plt.close("all")
 
 
-def openfile():
+def open_file():
     """Uses a GUI to select a file then returns the content of this file as a list of strings"""
     filename = fd.askopenfilename(title="Select a file", filetypes=[("AMBP50 Files", "*.awp")])
     with open(filename) as f:
@@ -69,7 +69,7 @@ def read_file(file):
 
 
 def identify_version(file):
-    """Function to identify whether .awp file is version 1 or 2. Function not currently in use"""
+    """Function to identify whether .awp file is version 1 or 2. Function not yet in use"""
     version = 1
     for line in file:
         if "FileVersion_Main=2" in line:
@@ -93,6 +93,6 @@ def graph_observations(dataframe):
     plt.show()
 
 
-data, meta = read_file(openfile())
+data, meta = read_file(open_file())
 graph_observations(data)
 export_to_csv(data, meta)
