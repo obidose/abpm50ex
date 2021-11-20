@@ -77,12 +77,13 @@ def identify_version(file):
     return version
 
 
-def graph_observations(dataframe):
+def graph_observations(dataframe, title):
     """Takes a dataset and creates a graph of BP and MAP over time"""
     x = dataframe.DateTime
     a1 = pd.Series(dataframe["BP1 Sys"])
     a2 = pd.Series(dataframe["BP2 Dia"])
     a3 = pd.Series(dataframe["MAP"])
+    plt.title(title)
     plt.plot(x, a1, marker="^")
     plt.plot(x, a2, marker="v")
     plt.axhline(y=130)
@@ -94,5 +95,5 @@ def graph_observations(dataframe):
 
 
 data, meta = read_file(open_file())
-graph_observations(data)
-export_to_csv(data, meta)
+graph_observations(data, meta["Name"])
+# export_to_csv(data, meta)
