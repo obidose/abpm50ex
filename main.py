@@ -30,9 +30,9 @@ def parse_data(line_of_data, temp_array):
 
 
 def export_to_csv(df, meta_dat):
-    """Arranges field order for export. Opens Dialog to select save folder. Exports data to a CSV file using metadata to
-    generate filename. """
+    """Formats and exports data to a CSV file, using metadata to generate the filename. """
     df = df[['DateTime', 'BP1 Sys', 'BP2 Dia', 'MAP', 'HR']].copy()
+    df["DateTime"] = df["DateTime"].dt.strftime('%d/%m/%y %H:%M')
     df.rename(columns={'BP1 Sys': 'Systolic', 'BP2 Dia': 'Diastolic'}, inplace=True)
     df.to_csv(fd.askdirectory(title="Select Save Directory") + "/" + meta_dat["Name"] + meta_dat["ID"] + ".csv")
 
@@ -64,7 +64,7 @@ def read_file(file):
         else:
             continue
     df = pd.DataFrame(data_array).T  # Creates dataframe from dictionary
-    df["DateTime"] = pd.to_datetime(df[["Year", "Month", "Day", "Hour", "Minute"]]).dt.strftime('%d/%m/%y %H:%M')
+    df["DateTime"] = pd.to_datetime(df[["Year", "Month", "Day", "Hour", "Minute"]])
     return df, meta_data
 
 
@@ -91,9 +91,10 @@ def graph_observations(dataframe, title):
     plt.plot(x, a3, linestyle="dotted", color='green')
     plt.bar(x=x, height=a1 - a2, bottom=a2, width=0.05, alpha=.2)
     plt.fill_between(x, a1, a2, color='blue', alpha=.1)
+    plt.gcf().autofmt_xdate()
     plt.show()
 
 
 data, meta = read_file(open_file())
 graph_observations(data, meta["Name"])
-# export_to_csv(data, meta)
+export_to_csv(data, meta)
