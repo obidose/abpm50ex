@@ -68,6 +68,13 @@ def read_file():
     """opens a .awp file. Returns dataset item containing all readings(df) and meta data(dictionary). """
     file = open_file()
     version = identify_version(file)
+    if version == 1:
+        read_v2(file)  # no v1 tool yet
+    else:
+        read_v2(file)
+
+
+def read_v2(file):
     data_array = {}
     meta_data = {}
     for lines in file:
@@ -97,9 +104,9 @@ def read_file():
     current_data = Dataset(df, meta_data)
     number_of_entries = df.shape[0]
     save_button["state"] = "enabled"
-    current_state_label["text"] = "File loaded \n" + \
+    current_state_label["text"] = ".awp Version 2 File loaded \n" + \
                                   str(number_of_entries) + \
-                                  " events loaded.\n" + \
+                                  " events read.\n" + \
                                   "Note: filename will be " + current_data.meta_data["Name"] \
                                   + current_data.meta_data["ID"] + ".xlsx\n" + \
                                   "you will be able to select save location after clicking save"
@@ -170,8 +177,12 @@ def analyse(df):
 
 def validate_entry(entry):
     """Takes a data line and checks if it is physiologically valid"""
-    valid = entry["Sys"] > entry["Dia"] + 20
-    return valid
+    if not entry["Sys"] > entry["Dia"] + 20:
+        valid_code = 0
+    else:
+        valid_code = 1
+
+    return valid_code
 
 
 #   GUI
