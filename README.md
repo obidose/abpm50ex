@@ -9,4 +9,4 @@ The tool works for up to 999 data entries in a file.
 
 Usage:
 Feel free to run the python script dierectly
-However, an exe file has been uploaded for anyone less technical who wants their ABPM50 data in excel format. Simply download the exe file in from the bin folder and run it.
+However, an exe file has been uploaded for anyone less technical who wants their ABPM50 data in excel format. Simply download the exe file in from the bin folder and run it. (https://github.com/obidose/abpm50ex/blob/master/bin/main.exe)
