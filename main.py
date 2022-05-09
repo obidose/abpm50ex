@@ -33,29 +33,33 @@ def parse_data(line_of_data, temp_array):
         "Day": int(line_of_data[10:12], 16),
         "Hour": int(line_of_data[12:14], 16),
         "Minute": int(line_of_data[14:16], 16),
-        "BP1 Sys": int(line_of_data[20:22], 16),
-        "BP2 Dia": int(line_of_data[24:26], 16),
+        "Sys": int(line_of_data[20:22], 16),
+        "Dia": int(line_of_data[24:26], 16),
         "MAP": int(line_of_data[28:30], 16),
         "HR": int(line_of_data[32:34], 16),
     }
+    temp_array[line_of_data[0:3]]["Valid"] = validate_entry(temp_array[line_of_data[0:3]])
     return temp_array
 
 
-def export_to_csv(df, meta_dat):
-    """Formats and exports data to a CSV file, using metadata to generate the filename. """
-    df = df[['DateTime', 'BP1 Sys', 'BP2 Dia', 'MAP', 'HR']].copy()
-    df["DateTime"] = df["DateTime"].dt.strftime('%d/%m/%y %H:%M')
-    df.rename(columns={'BP1 Sys': 'Systolic', 'BP2 Dia': 'Diastolic'}, inplace=True)
-    df.to_csv(fd.askdirectory(title="Select Save Directory") + "/" + meta_dat["Name"] + meta_dat["ID"] + ".csv")
+# Deprecated - now uses excel function
+# def export_to_csv(df, meta_dat):
+#     """Formats and exports data to a CSV file, using metadata to generate the filename. """
+#     df = df[['DateTime', 'BP1 Sys', 'BP2 Dia', 'MAP', 'HR', 'Valid']].copy()
+#     df["DateTime"] = df["DateTime"].dt.strftime('%d/%m/%y %H:%M')
+#     df.rename(columns={'BP1 Sys': 'Systolic', 'BP2 Dia': 'Diastolic'}, inplace=True)
+#     df.to_csv(fd.askdirectory(title="Select Save Directory") + "/" + meta_dat["Name"] + meta_dat["ID"] + ".csv")
 
 
 def export_to_excel(df, meta_dat):
     """Opens a window to select a save directory. Takes a dataframe and saves it to the selected directory as
     output.xlsx """
-    df = df[['DateTime', 'BP1 Sys', 'BP2 Dia', 'MAP', 'HR']].copy()
+    df = df[['DateTime', 'Sys', 'Dia', 'MAP', 'HR', 'Valid']].copy()
+
     df["DateTime"] = df["DateTime"].dt.strftime('%d/%m/%y %H:%M')
-    df.rename(columns={'BP1 Sys': 'Systolic', 'BP2 Dia': 'Diastolic'}, inplace=True)
-    df.to_excel(fd.askdirectory(title="Select Save Directory") + meta_dat["Name"] + meta_dat["ID"] + ".xlsx")
+    # This turns datetime to string, would need reversing if reimporting data
+
+    df.to_excel(fd.askdirectory(title="Select Save Directory") + "/" + meta_dat["Name"] + meta_dat["ID"] + ".xlsx")
     tk.messagebox.showinfo('Save Complete', 'Output saved!')
 
 
@@ -101,7 +105,7 @@ def read_file():
                                   "you will be able to select save location after clicking save"
 
 
-# Original read_file method
+# Original read_file method - deprecated
 # def read_file(file):
 #     """Takes a .awp file which has been parsed into lines of strings. Returns a pandas dataframe containing all
 #     readings and a dictionary containing meta data. """
@@ -136,8 +140,8 @@ def read_file():
 def identify_version(file):
     """Function to identify whether .awp file is version 1 or 2. Function not yet in use"""
     version = 1
-    for line in file:
-        if "FileVersion_Main=2" in line:
+    for lines in file:
+        if "FileVersion_Main=2" in lines:
             version = 2
     return version
 
@@ -145,8 +149,8 @@ def identify_version(file):
 def graph_observations(dataframe, title):
     """Takes a dataset and creates a graph of BP and MAP over time"""
     x = dataframe.DateTime
-    a1 = pd.Series(dataframe["BP1 Sys"])
-    a2 = pd.Series(dataframe["BP2 Dia"])
+    a1 = pd.Series(dataframe["Sys"])
+    a2 = pd.Series(dataframe["Dia"])
     a3 = pd.Series(dataframe["MAP"])
     plt.title(title)
     plt.plot(x, a1, marker="^")
@@ -160,7 +164,17 @@ def graph_observations(dataframe, title):
     plt.show()
 
 
-#   Work in progress - GUI structure
+def analyse(df):
+    """Takes a set of readings and provides physiological analysis. WIP"""
+
+
+def validate_entry(entry):
+    """Takes a data line and checks if it is physiologically valid"""
+    valid = entry["Sys"] > entry["Dia"] + 20
+    return valid
+
+
+#   GUI
 root = tk.Tk()
 root.title("ABPM50ex")
 root.geometry('600x400+50+50')
@@ -202,7 +216,7 @@ save_button.pack(
 save_button["state"] = "disabled"
 root.mainloop()
 
-# Working main structure
+# Deprecated linear structure
 # data, meta = read_file(open_file())
 # graph_observations(data, meta["Name"])
 # export_to_csv(data, meta)
